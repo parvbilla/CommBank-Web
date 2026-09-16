@@ -20,6 +20,7 @@ export interface Application {
 export interface Goal {
   id: string
   name: string
+  icon?: string
   targetAmount: number
   balance: number
   targetDate: Date
@@ -65,4 +66,5 @@ export enum ApplicationStatus {
 }
 
 export type ModalContent = Goal
+
 export type ModalType = 'Goal'

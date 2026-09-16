@@ -1,9 +1,12 @@
 import { faPlusCircle } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import React, { useEffect } from 'react'
+import React from 'react'
 import styled from 'styled-components'
-import { createGoal as createGoalApi, getGoals } from '../../../../api/lib'
-import { createGoal as createGoalRedux, selectGoalsList } from '../../../../store/goalsSlice'
+import { createGoal as createGoalApi} from '../../../../api/lib'
+import {
+  createGoal as createGoalRedux,
+  selectGoalsList,
+} from '../../../../store/goalsSlice'
 import { useAppDispatch, useAppSelector } from '../../../../store/hooks'
 import {
   setContent as setContentRedux,
@@ -18,13 +21,17 @@ export default function GoalsSection() {
   const dispatch = useAppDispatch()
   const goalIds = useAppSelector(selectGoalsList)
 
-  useEffect(() => {
-    async function fetch() {
-      const goals = await getGoals()
-      goals?.forEach((goal) => dispatch(createGoalRedux(goal)))
-    }
-    fetch()
-  }, [dispatch])
+  // useEffect(() => {
+  //   async function fetch() {
+  //     const goals = await getGoals()
+
+  //     goals?.forEach((goal) => {
+  //       dispatch(createGoalRedux(goal))
+  //     })
+  //   }
+
+  //   fetch()
+  // }, [dispatch])
 
   const onClick = async () => {
     const goal = await createGoalApi()
@@ -41,8 +48,13 @@ export default function GoalsSection() {
     <Container>
       <TopGroup>
         <SectionHeading>Goals</SectionHeading>
+
         <Icon onClick={onClick}>
-          <FontAwesomeIcon icon={faPlusCircle} size="2x" className="alert" />
+          <FontAwesomeIcon
+            icon={faPlusCircle}
+            size="2x"
+            className="alert"
+          />
         </Icon>
       </TopGroup>
 
@@ -76,4 +88,5 @@ const TopGroup = styled.div`
 
 const Icon = styled.a`
   margin-left: 1rem;
+  cursor: pointer;
 `

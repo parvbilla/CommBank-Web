@@ -33,12 +33,20 @@ export async function getGoals(): Promise<Goal[] | null> {
 
 export async function createGoal(): Promise<Goal | null> {
   try {
-    const response = await axios.post(`${API_ROOT}/api/Goal`, {
-      userId: user.id,
-      targetDate: new Date(),
-    })
+    const response = await axios.post(
+      `${API_ROOT}/api/Goal`,
+      {
+        userId: user.id,
+        targetDate: new Date(),
+      },
+      {
+        timeout: 5000,
+      }
+    )
+
     return response.data
   } catch (error: any) {
+    console.error('Create Goal Error:', error)
     return null
   }
 }

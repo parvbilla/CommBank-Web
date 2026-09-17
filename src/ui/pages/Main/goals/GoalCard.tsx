@@ -16,21 +16,34 @@ export default function GoalCard(props: Props) {
 
   const goal = useAppSelector(selectGoalsMap)[props.id]
 
+  // Prevent rendering if the goal does not exist
+  if (!goal) {
+    return null
+  }
+
   const onClick = (event: React.MouseEvent) => {
     event.stopPropagation()
+
     dispatch(setContentRedux(goal))
     dispatch(setTypeRedux('Goal'))
     dispatch(setIsOpenRedux(true))
   }
 
-  const asLocaleDateString = (date: Date) =>
-    new Date(date).toLocaleDateString()
+  const asLocaleDateString = (date: Date) => {
+    return new Date(date).toLocaleDateString()
+  }
 
   return (
-    <Container key={goal.id} onClick={onClick}>
+    <Container onClick={onClick}>
       {goal.icon && <GoalIcon>{goal.icon}</GoalIcon>}
-      <TargetAmount>${goal.targetAmount}</TargetAmount>
-      <TargetDate>{asLocaleDateString(goal.targetDate)}</TargetDate>
+
+      <TargetAmount>
+        ${goal.targetAmount}
+      </TargetAmount>
+
+      <TargetDate>
+        {asLocaleDateString(goal.targetDate)}
+      </TargetDate>
     </Container>
   )
 }

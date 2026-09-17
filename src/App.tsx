@@ -3,7 +3,10 @@ import React, { useEffect } from 'react'
 import styled, { ThemeProvider } from 'styled-components'
 import { getUser as getUserApi } from './api/lib'
 import { useAppDispatch, useAppSelector } from './store/hooks'
-import { selectIsOpen, setIsOpen as setIsOpenRedux } from './store/modalSlice'
+import {
+  selectIsOpen,
+  setIsOpen as setIsOpenRedux,
+} from './store/modalSlice'
 import { selectMode } from './store/themeSlice'
 import { setUser as setUserRedux } from './store/userSlice'
 import { GlobalStyle } from './ui/components/GlobalStyles'
@@ -16,33 +19,44 @@ export default function App() {
   const modalIsOpen = useAppSelector(selectIsOpen)
   const dispatch = useAppDispatch()
 
-  const muiTheme = createTheme({ palette: { type: mode } })
+  const muiTheme = createTheme({
+    palette: {
+      type: mode,
+    },
+  })
 
   useEffect(() => {
-    async function fetch() {
+    async function fetchUser() {
       const user = await getUserApi()
+
       if (user != null) {
         dispatch(setUserRedux(user))
       }
     }
 
-    fetch()
+    fetchUser()
   }, [dispatch])
 
-  const onClick = (event: React.MouseEvent) => {
-    event.stopPropagation()
-    dispatch(setIsOpenRedux(false))
+  const closeModal = (event: React.MouseEvent) => {
+    if (event.target === event.currentTarget) {
+      dispatch(setIsOpenRedux(false))
+    }
   }
 
   return (
-    <AppContainer onClick={onClick}>
+    <AppContainer>
       <ThemeProviderMui theme={muiTheme}>
-        <ThemeProvider theme={mode === 'light' ? LightTheme : DarkTheme}>
+        <ThemeProvider
+          theme={mode === 'light' ? LightTheme : DarkTheme}
+        >
           <GlobalStyle />
 
           <Main />
 
-          <ModalContainer isOpen={modalIsOpen}>
+          <ModalContainer
+            isOpen={modalIsOpen}
+            onClick={closeModal}
+          >
             <Modal />
           </ModalContainer>
         </ThemeProvider>
@@ -53,18 +67,28 @@ export default function App() {
 
 const AppContainer = styled.div`
   position: relative;
+  min-height: 100vh;
 `
+
 const ModalContainer = styled.div<ModalContainerProps>`
   width: 100vw;
   height: 100vh;
+
   display: ${(props) => (props.isOpen ? 'flex' : 'none')};
+
   flex-direction: row;
   justify-content: center;
   align-items: center;
+
   background-color: ${({ theme }) => theme.overlay};
-  position: absolute;
+
+  position: fixed;
   top: 0;
   left: 0;
+
+  z-index: 9999;
 `
 
-type ModalContainerProps = { isOpen: boolean }
+type ModalContainerProps = {
+  isOpen: boolean
+}

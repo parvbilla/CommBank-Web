@@ -1,8 +1,11 @@
 import { faPlusCircle } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import styled from 'styled-components'
-import { createGoal as createGoalApi} from '../../../../api/lib'
+import {
+  createGoal as createGoalApi,
+  getGoals,
+} from '../../../../api/lib'
 import {
   createGoal as createGoalRedux,
   selectGoalsList,
@@ -21,26 +24,49 @@ export default function GoalsSection() {
   const dispatch = useAppDispatch()
   const goalIds = useAppSelector(selectGoalsList)
 
-  // useEffect(() => {
-  //   async function fetch() {
-  //     const goals = await getGoals()
+  // Load latest saved goal after page refresh
+useEffect(() => {
+  async function fetchLatestGoal() {
+    const goals = await getGoals()
 
-  //     goals?.forEach((goal) => {
-  //       dispatch(createGoalRedux(goal))
-  //     })
-  //   }
+    if (!goals || goals.length === 0) return
 
-  //   fetch()
-  // }, [dispatch])
+    const latestGoal = goals.reduce((latest, current) => {
+      return new Date(current.created).getTime() >
+        new Date(latest.created).getTime()
+        ? current
+        : latest
+    })
+
+    dispatch(createGoalRedux(latestGoal))
+  }
+
+  fetchLatestGoal()
+}, [dispatch])
+
+  const [isCreating, setIsCreating] = useState(false)
 
   const onClick = async () => {
-    const goal = await createGoalApi()
+    if (isCreating) return
 
-    if (goal != null) {
+    try {
+      setIsCreating(true)
+
+      const goal = await createGoalApi()
+
+      if (!goal) {
+        console.error('Goal creation failed')
+        return
+      }
+
       dispatch(createGoalRedux(goal))
       dispatch(setContentRedux(goal))
       dispatch(setTypeRedux('Goal'))
       dispatch(setIsOpenRedux(true))
+    } catch (error) {
+      console.error('Goal creation error:', error)
+    } finally {
+      setIsCreating(false)
     }
   }
 
@@ -49,13 +75,17 @@ export default function GoalsSection() {
       <TopGroup>
         <SectionHeading>Goals</SectionHeading>
 
-        <Icon onClick={onClick}>
+        <IconButton
+          type="button"
+          onClick={onClick}
+          disabled={isCreating}
+          aria-label="Create new goal"
+        >
           <FontAwesomeIcon
             icon={faPlusCircle}
             size="2x"
-            className="alert"
           />
-        </Icon>
+        </IconButton>
       </TopGroup>
 
       <GoalsContent ids={goalIds} />
@@ -86,7 +116,15 @@ const TopGroup = styled.div`
   }
 `
 
-const Icon = styled.a`
+const IconButton = styled.button`
   margin-left: 1rem;
+  border: none;
+  background: transparent;
+  padding: 0;
   cursor: pointer;
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
 `
